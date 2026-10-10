@@ -1,1 +1,875 @@
-# humu-fluida-dan-arcimendes
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Lab Fluida</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600..800&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* Layout: satu kolom lebar 1080px; hero dua kolom, lalu dua laboratorium (stage di kiri, kontrol dan angka di kanan), lalu tabel ringkasan.
+   Warna: kertas biru-dingin, hidrolik = kuning oli, Archimedes = biru air. Tipe: Bricolage (judul), Plex Sans (isi), Plex Mono (angka dan rumus). */
+:root{
+  --bg:#EDF2F6; --surface:#F8FAFC; --stage:#E2EAF1; --ink:#0E2233; --muted:#46596B; --line:#C3D0DB;
+  --oil:#D9890B; --oil-text:#8F4C00; --oil-btn:#A85A00; --on-oil:#FFFFFF;
+  --water:#2A86BF; --water-text:#11567F; --water-btn:#176FA6; --on-water:#FFFFFF;
+  --steel:#8796A5; --steel-dark:#4B5A68; --warn:#B3261E; --good:#1F7A4D;
+  --f-display:"Bricolage Grotesque",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0A1621; --surface:#0F1E2B; --stage:#0D1B28; --ink:#E5EEF6; --muted:#9FB3C5; --line:#24384A;
+    --oil:#F0A33A; --oil-text:#F5B65E; --oil-btn:#F0A33A; --on-oil:#1A1000;
+    --water:#4DB1E8; --water-text:#7CC6F0; --water-btn:#4DB1E8; --on-water:#04202F;
+    --steel:#7D8FA0; --steel-dark:#B3C2CF; --warn:#FF8A7A; --good:#6FD6A3;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0A1621; --surface:#0F1E2B; --stage:#0D1B28; --ink:#E5EEF6; --muted:#9FB3C5; --line:#24384A;
+  --oil:#F0A33A; --oil-text:#F5B65E; --oil-btn:#F0A33A; --on-oil:#1A1000;
+  --water:#4DB1E8; --water-text:#7CC6F0; --water-btn:#4DB1E8; --on-water:#04202F;
+  --steel:#7D8FA0; --steel-dark:#B3C2CF; --warn:#FF8A7A; --good:#6FD6A3;
+  color-scheme:dark;
+}
+
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion: reduce){html{scroll-behavior:auto}}
+body{background:var(--bg);color:var(--ink);font:400 16px/1.65 var(--f-body);padding-inline:clamp(16px,4vw,32px);padding-block:0 56px}
+*,*::before,*::after{box-sizing:border-box}
+.page{max-width:1080px;margin-inline:auto}
+:focus-visible{outline:2px solid var(--water-text);outline-offset:2px}
+sub{font-size:.72em;line-height:0}
+h1,h2,h3{margin:0;text-wrap:balance}
+p{margin:0}
+
+/* header */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:4px 24px;padding-block:12px;background:var(--bg);border-bottom:1px solid var(--line)}
+.brand{font:800 1.2rem var(--f-display);letter-spacing:-.01em;color:var(--ink);text-decoration:none}
+.top nav{display:flex;flex-wrap:wrap;gap:4px 20px}
+.top nav a{color:var(--muted);text-decoration:none;font-weight:500;font-size:.95rem;padding-block:6px;border-bottom:2px solid transparent}
+.top nav a:hover{color:var(--ink);border-color:var(--ink)}
+
+/* hero */
+.hero{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:32px 48px;align-items:end;padding-block:48px 44px}
+.hero h1{font:800 clamp(2.2rem,6.4vw,4rem)/1.02 var(--f-display);letter-spacing:-.025em}
+.hero .lede{color:var(--muted);max-width:52ch;font-size:1.1rem;margin-top:18px}
+.laws{border-top:1px solid var(--line)}
+.law{display:block;padding-block:16px;border-bottom:1px solid var(--line);color:inherit;text-decoration:none}
+.law small{display:block;font:500 .75rem var(--f-mono);letter-spacing:.08em;text-transform:uppercase}
+.law .f{display:block;font:500 clamp(1.4rem,3.6vw,2rem)/1.3 var(--f-mono);margin-block:2px 0}
+.law .go{font-size:.9rem;color:var(--muted)}
+.law:hover .go{color:var(--ink)}
+.law.p small{color:var(--oil-text)}
+.law.a small{color:var(--water-text)}
+
+/* sections */
+section{padding-block:44px;border-top:1px solid var(--line);scroll-margin-top:64px}
+.kicker{font:500 .78rem var(--f-mono);letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px}
+.k-p{color:var(--oil-text)} .k-a{color:var(--water-text)}
+h2{font:800 clamp(1.7rem,4.4vw,2.5rem)/1.1 var(--f-display);letter-spacing:-.02em}
+h3{font:700 1.15rem/1.3 var(--f-display);letter-spacing:-.005em;margin-bottom:8px}
+.intro{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:24px 48px;margin-top:20px;align-items:start}
+.prose{max-width:65ch;color:var(--ink)}
+.prose p+p{margin-top:12px}
+.eq{font:500 1.1rem/1.7 var(--f-mono);padding-block:12px;border-block:1px solid var(--line);margin-block:4px 0}
+.eq span{display:block}
+.eq .cap{font:400 .85rem var(--f-body);color:var(--muted)}
+.muted{color:var(--muted)}
+
+/* simulator */
+.sim{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:28px;margin-top:32px;align-items:start}
+.sim-p{accent-color:var(--oil-btn)}
+.sim-a{accent-color:var(--water-btn)}
+.sim-svg{display:block;width:100%;height:auto;background:var(--stage);border:1px solid var(--line);border-radius:8px}
+.status{margin-top:12px;padding:10px 12px;min-height:4.4em;background:var(--stage);border-radius:6px;font-size:.95rem;color:var(--ink)}
+.status.warn{color:var(--warn)}
+.field{display:grid;gap:2px;margin-bottom:12px}
+.field .row{display:flex;justify-content:space-between;align-items:baseline;gap:12px;font-size:.92rem}
+.field output{font:500 .92rem var(--f-mono)}
+input[type=range]{width:100%;height:28px;margin:0}
+select{width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--ink);font:inherit;min-height:40px}
+.btns{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
+.btn{font:600 .92rem var(--f-body);padding:9px 14px;border-radius:6px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer;min-height:40px}
+.btn:hover{border-color:var(--ink)}
+.btn.p{background:var(--oil-btn);color:var(--on-oil);border-color:transparent}
+.btn.a{background:var(--water-btn);color:var(--on-water);border-color:transparent}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+.chip{font:500 .85rem var(--f-body);padding:5px 11px;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.chip:hover{border-color:var(--ink)}
+.chip[aria-pressed="true"]{background:var(--water-btn);color:var(--on-water);border-color:transparent}
+.ro-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 16px;margin:18px 0 0;padding-top:16px;border-top:1px solid var(--line)}
+.ro dt{font-size:.8rem;color:var(--muted);line-height:1.3}
+.ro dd{margin:2px 0 0;font:500 1.1rem var(--f-mono);font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.formula{margin-top:14px;font:400 .88rem/1.7 var(--f-mono);color:var(--ink);overflow-wrap:anywhere}
+.formula b{font-weight:500}
+.note{margin-top:14px;font-size:.85rem;color:var(--muted);max-width:65ch}
+
+/* svg parts */
+.wall{fill:none;stroke:var(--steel-dark);stroke-width:7;stroke-linejoin:round}
+.fluid-oil{fill:var(--oil);fill-opacity:.6}
+.steel{fill:var(--steel)}
+.steel-d{fill:var(--steel-dark)}
+.grip{fill:var(--steel-dark)}
+.hit{fill:transparent}
+#pHandle{cursor:grab;touch-action:none}
+#pHandle:active{cursor:grabbing}
+#pHandle:focus{outline:none}
+#pHandle:focus-visible .grip{stroke:var(--ink);stroke-width:2}
+.car{fill:var(--steel-dark)}
+.tire{fill:var(--ink)}
+.carlbl{font:500 13px var(--f-mono);fill:var(--bg)}
+.arrows path{fill:none;stroke:var(--ink);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.tick{stroke:var(--muted);stroke-width:1.2;fill:none}
+.lbl{font:500 12px var(--f-mono);fill:var(--muted)}
+.mk{fill:var(--oil-text)}
+.pcap{font:500 16px var(--f-mono);fill:var(--oil-text)}
+.hint{fill:var(--oil-text);animation:nudge 1.4s ease-in-out infinite}
+.hint.off{display:none}
+@keyframes nudge{50%{transform:translateY(6px)}}
+.shake{animation:shake .3s}
+@keyframes shake{25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
+@media (prefers-reduced-motion: reduce){.hint,.shake{animation:none}}
+.tankwall{fill:none;stroke:var(--steel);stroke-width:6;stroke-linejoin:round;pointer-events:none}
+.surf{fill:none;stroke:var(--ink);stroke-opacity:.3;stroke-width:1.5;pointer-events:none}
+.cube{stroke:var(--ink);stroke-width:2;cursor:grab;touch-action:none}
+.cube:active{cursor:grabbing}
+.cube:focus-visible{outline:none;stroke-width:4}
+.ghost{stroke:var(--muted);stroke-width:1.2;stroke-dasharray:5 4;pointer-events:none}
+.rope{stroke:var(--ink);stroke-width:2;pointer-events:none}
+.scalebox{fill:var(--surface);stroke:var(--ink);stroke-width:1.5;pointer-events:none}
+.reading{font:500 15px var(--f-mono);fill:var(--ink);pointer-events:none}
+.halo{fill:none;stroke:var(--bg);stroke-width:8;stroke-linecap:round;stroke-linejoin:round}
+.arW{fill:none;stroke:var(--warn);stroke-width:4;stroke-linecap:round;stroke-linejoin:round}
+.arF{fill:none;stroke:var(--water-btn);stroke-width:4;stroke-linecap:round;stroke-linejoin:round}
+.alab{font:600 15px var(--f-mono);paint-order:stroke;stroke:var(--bg);stroke-width:4px;stroke-linejoin:round}
+#aArrows,#aRuler{pointer-events:none}
+
+/* tables, lists */
+.tbl-wrap{overflow-x:auto;margin-top:16px}
+table{border-collapse:collapse;width:100%;min-width:520px}
+th,td{text-align:left;padding:10px 14px 10px 0;border-bottom:1px solid var(--line);vertical-align:top;font-size:.95rem}
+th{font:500 .75rem var(--f-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+td .m{font-family:var(--f-mono);font-size:.9rem}
+ul.plain{margin:0;padding-left:1.1em}
+ul.plain li+li{margin-top:4px}
+.example{margin-top:28px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:24px 48px;align-items:start}
+.example .calc{font:400 .92rem/1.8 var(--f-mono);overflow-wrap:anywhere}
+.example .calc b{font-weight:500}
+footer{padding-top:28px;border-top:1px solid var(--line);font-size:.85rem;color:var(--muted);max-width:75ch}
+
+@media (max-width:860px){
+  .sim{grid-template-columns:minmax(0,1fr)}
+  .intro,.example{grid-template-columns:minmax(0,1fr)}
+}
+@media (max-width:760px){
+  .hero{grid-template-columns:minmax(0,1fr);padding-block:32px 28px}
+}
+</style>
+
+<div class="page" id="atas">
+  <header class="top">
+    <a class="brand" href="#atas">Lab Fluida</a>
+    <nav aria-label="Navigasi halaman">
+      <a href="#pascal">Hukum Pascal</a>
+      <a href="#archimedes">Hukum Archimedes</a>
+      <a href="#ringkas">Ringkasan</a>
+    </nav>
+  </header>
+
+  <div class="hero">
+    <div>
+      <h1>Hukum Pascal dan Hukum Archimedes</h1>
+      <p class="lede">Dua aturan tentang fluida yang diam. Tarik pegangan dongkrak untuk melihat tekanan merambat, lalu celupkan kubus ke berbagai cairan dan lihat kapan ia mengapung.</p>
+    </div>
+    <div class="laws">
+      <a class="law p" href="#pascal">
+        <small>Hukum Pascal</small>
+        <span class="f">P = F / A</span>
+        <span class="go">Buka dongkrak hidrolik</span>
+      </a>
+      <a class="law a" href="#archimedes">
+        <small>Hukum Archimedes</small>
+        <span class="f">F<sub>A</sub> = ρ · g · V</span>
+        <span class="go">Buka simulasi gaya apung</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- ===================== PASCAL ===================== -->
+  <section id="pascal" class="sim-p">
+    <div class="kicker k-p">Hidrolika</div>
+    <h2>Hukum Pascal</h2>
+
+    <div class="intro">
+      <div class="prose">
+        <p>Tekanan yang diberikan pada fluida di dalam ruang tertutup diteruskan sama besar ke seluruh bagian fluida dan ke dinding wadahnya.</p>
+        <p>Karena tekanannya sama di kedua piston, gaya kecil pada luas kecil menghasilkan gaya besar pada luas besar. Harganya: piston kecil harus bergerak jauh supaya piston besar naik sedikit.</p>
+      </div>
+      <div class="eq">
+        <span>P = F ÷ A</span>
+        <span>F<sub>2</sub> = F<sub>1</sub> × A<sub>2</sub> ⁄ A<sub>1</sub></span>
+        <span>A<sub>1</sub> · s<sub>1</sub> = A<sub>2</sub> · s<sub>2</sub></span>
+        <span class="cap">P tekanan (Pa = N/m²), F gaya (N), A luas (m²), s jarak gerak piston.</span>
+      </div>
+    </div>
+
+    <div class="sim">
+      <div>
+        <svg id="pSvg" class="sim-svg" viewBox="0 0 560 420" role="img" aria-labelledby="pT pD">
+          <title id="pT">Simulasi dongkrak hidrolik</title>
+          <desc id="pD">Dua silinder berisi oli yang terhubung di bagian bawah. Menekan piston kecil di kiri mengangkat piston besar di kanan yang membawa mobil.</desc>
+          <path id="pFluid" class="fluid-oil"/>
+          <path id="pOuter" class="wall"/>
+          <path id="pInner" class="wall"/>
+          <g id="pRulers"></g>
+          <text class="lbl" x="58" y="118" text-anchor="middle">s (cm)</text>
+          <text class="lbl" x="490" y="196" text-anchor="middle">h (cm)</text>
+          <g id="pArr1" class="arrows"></g>
+          <g id="pArr2" class="arrows"></g>
+          <rect id="pHead1" class="steel"/>
+          <rect id="pRod1" class="steel"/>
+          <rect id="pHead2" class="steel"/>
+          <rect id="pRod2" class="steel"/>
+          <rect id="pPlat" class="steel-d"/>
+          <g id="pCar">
+            <rect class="car" x="0" y="18" width="130" height="24" rx="7"/>
+            <path class="car" d="M26 18L38 2H88L102 18Z"/>
+            <circle class="tire" cx="30" cy="44" r="9"/>
+            <circle class="tire" cx="100" cy="44" r="9"/>
+            <text id="pCarLbl" class="carlbl" x="65" y="35" text-anchor="middle">200 kg</text>
+          </g>
+          <g id="pHandle" tabindex="0" role="button" aria-label="Pegangan pompa. Seret ke bawah, atau tekan Enter untuk satu langkah pompa.">
+            <g id="pShake">
+              <rect class="hit" x="-62" y="-26" width="124" height="70"/>
+              <rect id="pBar" class="grip" y="0" height="10" rx="4"/>
+              <path id="pHint" class="hint" d="M-8 -22L0 -9L8 -22Z"/>
+            </g>
+          </g>
+          <path id="pMk1" class="mk" d="M0 0L9 -5V5Z"/>
+          <path id="pMk2" class="mk" d="M0 0L-9 -5V5Z"/>
+          <text id="pPress" class="pcap" x="222" y="226" text-anchor="middle">P</text>
+          <text class="lbl" x="222" y="246" text-anchor="middle">sama di semua titik</text>
+          <text id="pLA1" class="lbl" x="105" y="385" text-anchor="middle"></text>
+          <text id="pLA2" class="lbl" x="390" y="385" text-anchor="middle"></text>
+        </svg>
+        <div id="pStatus" class="status" aria-live="polite"></div>
+        <div class="btns">
+          <button class="btn p" id="pump1" type="button">Pompa 1×</button>
+          <button class="btn" id="pump5" type="button">Pompa 5×</button>
+          <button class="btn" id="lower" type="button">Turunkan beban</button>
+        </div>
+      </div>
+
+      <div>
+        <div class="field">
+          <div class="row"><label for="pA1">Luas piston kecil A<sub>1</sub></label><output id="pA1o" for="pA1">10 cm²</output></div>
+          <input id="pA1" type="range" min="5" max="40" step="1" value="10">
+        </div>
+        <div class="field">
+          <div class="row"><label for="pA2">Luas piston besar A<sub>2</sub></label><output id="pA2o" for="pA2">100 cm²</output></div>
+          <input id="pA2" type="range" min="40" max="400" step="5" value="100">
+        </div>
+        <div class="field">
+          <div class="row"><label for="pM">Massa mobil</label><output id="pMo" for="pM">200 kg</output></div>
+          <input id="pM" type="range" min="20" max="2000" step="10" value="200">
+        </div>
+        <div class="field">
+          <div class="row"><label for="pFh">Gaya maksimum tanganmu</label><output id="pFho" for="pFh">250 N</output></div>
+          <input id="pFh" type="range" min="50" max="600" step="10" value="250">
+        </div>
+
+        <dl class="ro-grid">
+          <div class="ro"><dt>Tekanan fluida P</dt><dd id="roP">–</dd></div>
+          <div class="ro"><dt>Gaya dorong yang dibutuhkan F<sub>1</sub></dt><dd id="roF1">–</dd></div>
+          <div class="ro"><dt>Berat mobil W</dt><dd id="roW">–</dd></div>
+          <div class="ro"><dt>Keuntungan mekanik A<sub>2</sub>/A<sub>1</sub></dt><dd id="roKM">–</dd></div>
+          <div class="ro"><dt>Langkah tangan s</dt><dd id="roS">–</dd></div>
+          <div class="ro"><dt>Mobil naik h</dt><dd id="roH">–</dd></div>
+          <div class="ro"><dt>Usaha tangan</dt><dd id="roWin">–</dd></div>
+          <div class="ro"><dt>Usaha pada mobil</dt><dd id="roWout">–</dd></div>
+        </dl>
+        <p class="formula" id="pFormula"></p>
+      </div>
+    </div>
+    <p class="note">Cara membaca: tarik pegangan ke bawah, lepaskan, lalu ulangi. Saat pegangan naik, katup satu arah menahan oli di silinder besar sehingga mobil tidak turun, dan silinder kecil terisi lagi dari reservoir. Dua angka usaha selalu sama: dongkrak mengubah gaya kecil yang bekerja sepanjang jarak jauh menjadi gaya besar sepanjang jarak pendek, tanpa menambah energi. Oli dianggap tak termampatkan dan gesekan diabaikan.</p>
+
+    <div class="example">
+      <div>
+        <h3>Contoh hitung: mobil 1.000 kg</h3>
+        <p class="calc muted" style="margin-bottom:8px">A<sub>1</sub> = 10 cm² = 0,001 m², A<sub>2</sub> = 200 cm² = 0,02 m². Atur geser di atas ke nilai ini (gaya tangan 500 N) untuk mengulangnya.</p>
+        <div class="calc">
+          W = 1.000 × 9,8 = <b>9.800 N</b><br>
+          P = W ÷ A<sub>2</sub> = 9.800 ÷ 0,02 = <b>490.000 Pa</b><br>
+          F<sub>1</sub> = P × A<sub>1</sub> = 490.000 × 0,001 = <b>490 N</b><br>
+          Keuntungan mekanik = 200 ÷ 10 = <b>20×</b>
+        </div>
+      </div>
+      <div>
+        <h3>Di sekitarmu</h3>
+        <ul class="plain">
+          <li>Dongkrak botol dan dongkrak hidrolik bengkel</li>
+          <li>Rem hidrolik mobil dan sepeda motor</li>
+          <li>Kursi dokter gigi dan kursi salon</li>
+          <li>Lengan ekskavator dan mesin press</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== ARCHIMEDES ===================== -->
+  <section id="archimedes" class="sim-a">
+    <div class="kicker k-a">Gaya apung</div>
+    <h2>Hukum Archimedes</h2>
+
+    <div class="intro">
+      <div class="prose">
+        <p>Benda yang tercelup sebagian atau seluruhnya dalam fluida mengalami gaya ke atas yang besarnya sama dengan berat fluida yang dipindahkan benda itu.</p>
+        <p>Yang menentukan bukan berat benda saja, tetapi perbandingan massa jenis benda dengan massa jenis fluida. Besi mengapung di raksa, gabus mengapung di air, dan keduanya tenggelam kalau fluidanya terlalu ringan.</p>
+      </div>
+      <div>
+        <div class="eq">
+          <span>F<sub>A</sub> = ρ<sub>f</sub> · g · V<sub>tercelup</sub></span>
+          <span class="cap">F<sub>A</sub> gaya apung (N), ρ<sub>f</sub> massa jenis fluida (kg/m³), g = 9,8 m/s², V volume bagian yang tercelup (m³).</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Keadaan</th><th>Syarat massa jenis</th><th>Gaya</th><th>Bagian tercelup</th></tr></thead>
+        <tbody>
+          <tr><td>Mengapung</td><td class="m">ρ<sub>b</sub> &lt; ρ<sub>f</sub></td><td class="m">F<sub>A</sub> = W</td><td>Sebagian, sebesar ρ<sub>b</sub>/ρ<sub>f</sub></td></tr>
+          <tr><td>Melayang</td><td class="m">ρ<sub>b</sub> = ρ<sub>f</sub></td><td class="m">F<sub>A</sub> = W</td><td>Seluruhnya, di kedalaman mana saja</td></tr>
+          <tr><td>Tenggelam</td><td class="m">ρ<sub>b</sub> &gt; ρ<sub>f</sub></td><td class="m">F<sub>A</sub> &lt; W</td><td>Seluruhnya, turun sampai dasar</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="sim">
+      <div>
+        <svg id="aSvg" class="sim-svg" viewBox="0 0 520 450" role="img" aria-labelledby="aT aD">
+          <title id="aT">Simulasi benda dalam fluida</title>
+          <desc id="aD">Bak berisi fluida dan sebuah kubus yang bisa digeser naik turun. Panah merah menunjukkan berat, panah biru menunjukkan gaya apung.</desc>
+          <g id="aRuler"></g>
+          <line id="aLevel0" class="ghost" x1="40" x2="440" y1="242" y2="242"/>
+          <text class="lbl" x="48" y="236">level awal</text>
+          <rect id="aCube" class="cube" tabindex="0" role="img" aria-label="Kubus. Seret naik turun untuk menahannya, lepaskan untuk menjatuhkannya."/>
+          <path id="aWater"/>
+          <path id="aSurf" class="surf"/>
+          <path id="aWall" class="tankwall" d="M37 130V413H443V130"/>
+          <g id="aRope" style="display:none">
+            <line id="aRopeLine" class="rope" x1="240" x2="240" y1="40" y2="100"/>
+            <rect class="scalebox" x="186" y="8" width="108" height="32" rx="5"/>
+            <text id="aReading" class="reading" x="240" y="29" text-anchor="middle">0 N</text>
+          </g>
+          <g id="aArrows"></g>
+        </svg>
+        <div id="aStatus" class="status" aria-live="polite"></div>
+        <div class="btns">
+          <button class="btn a" id="aDrop" type="button">Jatuhkan benda dari atas</button>
+        </div>
+      </div>
+
+      <div>
+        <div class="field">
+          <label for="aFluid" style="font-size:.92rem">Fluida</label>
+          <select id="aFluid"></select>
+        </div>
+        <div class="chips" id="aChips" role="group" aria-label="Bahan benda">
+          <button class="chip" type="button" data-rho="240" aria-pressed="false">Gabus</button>
+          <button class="chip" type="button" data-rho="600" aria-pressed="false">Kayu</button>
+          <button class="chip" type="button" data-rho="917" aria-pressed="false">Es</button>
+          <button class="chip" type="button" data-rho="2700" aria-pressed="false">Aluminium</button>
+          <button class="chip" type="button" data-rho="7870" aria-pressed="false">Besi</button>
+        </div>
+        <div class="field">
+          <div class="row"><label for="aRho">Massa jenis benda ρ<sub>b</sub></label><output id="aRhoo" for="aRho">600 kg/m³</output></div>
+          <input id="aRho" type="range" min="0" max="1000" step="1" value="338">
+        </div>
+        <div class="field">
+          <div class="row"><label for="aVol">Volume benda</label><output id="aVolo" for="aVol">500 cm³</output></div>
+          <input id="aVol" type="range" min="100" max="1000" step="10" value="500">
+        </div>
+
+        <dl class="ro-grid">
+          <div class="ro"><dt>Massa jenis fluida ρ<sub>f</sub></dt><dd id="aoRf">–</dd></div>
+          <div class="ro"><dt>Volume tercelup</dt><dd id="aoSub">–</dd></div>
+          <div class="ro"><dt>Berat benda W</dt><dd id="aoW">–</dd></div>
+          <div class="ro"><dt>Gaya apung F<sub>A</sub></dt><dd id="aoFb">–</dd></div>
+          <div class="ro"><dt>Bacaan neraca pegas jika digantung di sini</dt><dd id="aoScale">–</dd></div>
+          <div class="ro"><dt>Permukaan fluida naik</dt><dd id="aoRise">–</dd></div>
+        </dl>
+        <p class="formula" id="aFormula"></p>
+        <p class="formula" id="aPredict"></p>
+      </div>
+    </div>
+    <p class="note">Cara memakai: seret kubus naik turun untuk menahannya (saat ditahan muncul neraca pegas yang membaca W − F<sub>A</sub>), lalu lepaskan. Ganti fluida atau massa jenis saat kubus berada di dalam cairan untuk melihat ia naik atau turun. Gerakan diperlambat lima kali supaya mudah diikuti. Permukaan fluida naik ketika benda masuk karena volumenya menggeser fluida.</p>
+
+    <div class="example">
+      <div>
+        <h3>Contoh hitung: kubus besi 500 cm³</h3>
+        <p class="calc muted" style="margin-bottom:8px">Massa jenis besi 7.870 kg/m³, dicelup penuh ke air tawar.</p>
+        <div class="calc">
+          W = 7.870 × 0,0005 × 9,8 = <b>38,56 N</b><br>
+          F<sub>A</sub> = 1.000 × 9,8 × 0,0005 = <b>4,90 N</b><br>
+          Neraca pegas = 38,56 − 4,90 = <b>33,66 N</b>
+        </div>
+      </div>
+      <div>
+        <h3>Kenapa kapal baja mengapung?</h3>
+        <p class="prose">Lambungnya berongga dan berisi udara, jadi massa jenis rata-rata kapal (baja ditambah udara) lebih kecil daripada air. Air laut sedikit lebih rapat daripada air tawar, sehingga kapal yang sama tercelup lebih dangkal di laut.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== RINGKASAN ===================== -->
+  <section id="ringkas">
+    <div class="kicker">Ringkasan</div>
+    <h2>Dua hukum, dibandingkan</h2>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th></th><th>Hukum Pascal</th><th>Hukum Archimedes</th></tr></thead>
+        <tbody>
+          <tr><td>Bunyi</td><td>Tekanan pada fluida tertutup diteruskan sama besar ke segala arah.</td><td>Gaya ke atas sama dengan berat fluida yang dipindahkan benda.</td></tr>
+          <tr><td>Rumus</td><td class="m">P = F/A, F<sub>2</sub> = F<sub>1</sub>·A<sub>2</sub>/A<sub>1</sub></td><td class="m">F<sub>A</sub> = ρ<sub>f</sub>·g·V<sub>tercelup</sub></td></tr>
+          <tr><td>Satuan</td><td>Pascal (Pa = N/m²)</td><td>Newton (N)</td></tr>
+          <tr><td>Syarat</td><td>Fluida tak termampatkan di ruang tertutup</td><td>Benda berada di dalam fluida yang diam</td></tr>
+          <tr><td>Contoh</td><td>Dongkrak hidrolik, rem mobil, kursi dokter gigi</td><td>Kapal, kapal selam, balon udara, hidrometer</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <footer>
+    Nilai yang dipakai: g = 9,8 m/s², massa jenis air tawar 1.000 kg/m³. Simulasi menganggap fluida tak termampatkan, gesekan kecil, dan bak berukuran 28,6 cm × 12 cm dengan kedalaman awal 12 cm.
+  </footer>
+</div>
+
+<script>
+(function(){
+'use strict';
+var $=function(id){return document.getElementById(id)};
+var nf=function(n,d){d=d||0;return n.toLocaleString('id-ID',{minimumFractionDigits:d,maximumFractionDigits:d})};
+var fN=function(n){return n>=100?nf(n,0):n>=10?nf(n,1):nf(n,2)};
+var clamp=function(x,a,b){return Math.min(b,Math.max(a,x))};
+var ease=function(u){return u<.5?2*u*u:1-Math.pow(-2*u+2,2)/2};
+var G=9.8;
+var reduce=!!(window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+function svgPt(svg,e){var p=svg.createSVGPoint();p.x=e.clientX;p.y=e.clientY;return p.matrixTransform(svg.getScreenCTM().inverse());}
+function setT(el,s){if(el._t!==s){el._t=s;el.textContent=s;}}
+function setH(el,s){if(el._h!==s){el._h=s;el.innerHTML=s;}}
+
+/* ============================ PASCAL ============================ */
+var P={A1:10,A2:100,m:200,Fh:250,s:0,h:0,Win:0,Wout:0,busy:false,seq:false,drag:null,pumping:false,shaking:false};
+var K=6,SMAX=20,HMAX=15,CX1=105,CX2=390,TOPY=100,BOTY=350,PIPEY=316,S0=130,H00=300;
+var pe={};
+['pSvg','pFluid','pOuter','pInner','pRulers','pArr1','pArr2','pHead1','pRod1','pHead2','pRod2','pPlat','pCar','pCarLbl','pHandle','pShake','pBar','pHint','pMk1','pMk2','pPress','pLA1','pLA2','pStatus','roP','roF1','roKM','roW','roS','roH','roWin','roWout','pFormula','pump1','pump5','lower'].forEach(function(k){pe[k]=$(k);});
+
+(function buildRulers(){
+  var d='M58 '+S0+'V'+(S0+SMAX*K)+'M490 '+H00+'V'+(H00-HMAX*K), l='', i, y, len;
+  for(i=0;i<=SMAX;i++){
+    y=S0+i*K; len=i%5===0?9:5; d+='M58 '+y+'h'+(-len);
+    if(i%5===0) l+='<text class="lbl" x="'+(58-len-3)+'" y="'+(y+4)+'" text-anchor="end">'+i+'</text>';
+  }
+  for(i=0;i<=HMAX;i++){
+    y=H00-i*K; len=i%5===0?9:5; d+='M490 '+y+'h'+len;
+    if(i%5===0) l+='<text class="lbl" x="'+(490+len+3)+'" y="'+(y+4)+'">'+i+'</text>';
+  }
+  pe.pRulers.innerHTML='<path class="tick" d="'+d+'"/>'+l;
+})();
+
+function arrowPath(x,yb,yt){return 'M'+x+' '+yb+'V'+yt+'M'+(x-4)+' '+(yt+6)+'L'+x+' '+yt+'L'+(x+4)+' '+(yt+6);}
+function setR(el,x,y,w,h){el.setAttribute('x',x);el.setAttribute('y',y);el.setAttribute('width',w);el.setAttribute('height',h);}
+
+function pCalc(){
+  var W=P.m*G, Pfl=W/(P.A2*1e-4), need=W*P.A1/P.A2, F2max=P.Fh*P.A2/P.A1;
+  return {W:W,Pfl:Pfl,need:need,F2max:F2max};
+}
+
+function pRender(){
+  var c=pCalc();
+  var w1=2*Math.sqrt(P.A1/Math.PI)*6.5, w2=2*Math.sqrt(P.A2/Math.PI)*6.5;
+  var yP1=S0+P.s*K, yP2=H00-P.h*K;
+  var a=CX1-w1/2,b=CX1+w1/2,cc=CX2-w2/2,d=CX2+w2/2;
+  var xL0=a-3.5,xL1=b+3.5,xR0=cc-3.5,xR1=d+3.5;
+  pe.pOuter.setAttribute('d','M'+xL0+' '+TOPY+'V'+(BOTY+3.5)+'H'+xR1+'V'+TOPY);
+  pe.pInner.setAttribute('d','M'+xL1+' '+TOPY+'V'+PIPEY+'H'+xR0+'V'+TOPY);
+  pe.pFluid.setAttribute('d','M'+a+' '+yP1+'H'+b+'V320H'+cc+'V'+yP2+'H'+d+'V'+BOTY+'H'+a+'Z');
+
+  setR(pe.pHead1,a,yP1-14,w1,14);
+  setR(pe.pRod1,CX1-3,yP1-14-70,6,70);
+  var hw=Math.max(46,w1/2+22);
+  pe.pBar.setAttribute('x',-hw);pe.pBar.setAttribute('width',2*hw);
+  pe.pHandle.setAttribute('transform','translate('+CX1+' '+(yP1-14-70-10)+')');
+
+  setR(pe.pHead2,cc,yP2-14,w2,14);
+  setR(pe.pRod2,CX2-3,yP2-14-40,6,40);
+  var pw=Math.max(w2+20,150), platTop=yP2-14-40-8;
+  setR(pe.pPlat,CX2-pw/2,platTop,pw,8);
+  pe.pCar.setAttribute('transform','translate('+(CX2-65)+' '+(platTop-53)+')');
+  setT(pe.pCarLbl,nf(P.m)+' kg');
+
+  var n1=Math.max(1,Math.floor(w1/22)), n2=Math.max(1,Math.floor(w2/22)), i, d1='', d2='';
+  for(i=0;i<n1;i++) d1+=arrowPath(CX1+(i-(n1-1)/2)*22,yP1+28,yP1+8);
+  for(i=0;i<n2;i++) d2+=arrowPath(CX2+(i-(n2-1)/2)*22,yP2+28,yP2+8);
+  var op=(0.35+0.65*Math.min(1,c.Pfl/1e6)).toFixed(2);
+  setH(pe.pArr1,'<path d="'+d1+'"/>'); setH(pe.pArr2,'<path d="'+d2+'"/>');
+  pe.pArr1.style.opacity=op; pe.pArr2.style.opacity=op;
+
+  pe.pMk1.setAttribute('transform','translate(61 '+yP1+')');
+  pe.pMk2.setAttribute('transform','translate(488 '+yP2+')');
+
+  var kpa=c.Pfl/1000;
+  setT(pe.pPress,'P = '+(kpa>=100?nf(kpa,0):nf(kpa,1))+' kPa');
+  setH(pe.pLA1,'A<tspan dy="3" font-size="10">1</tspan><tspan dy="-3"> = '+nf(P.A1)+' cm²</tspan>');
+  setH(pe.pLA2,'A<tspan dy="3" font-size="10">2</tspan><tspan dy="-3"> = '+nf(P.A2)+' cm²</tspan>');
+
+  setT(pe.roP,(kpa>=100?nf(kpa,0):nf(kpa,1))+' kPa');
+  setT(pe.roF1,fN(c.need)+' N');
+  setT(pe.roW,fN(c.W)+' N');
+  setT(pe.roKM,nf(P.A2/P.A1,1)+'×');
+  setT(pe.roS,nf(P.s,1)+' cm');
+  setT(pe.roH,nf(P.h,2)+' cm');
+  setT(pe.roWin,nf(P.Win,2)+' J');
+  setT(pe.roWout,nf(P.Wout,2)+' J');
+  setH(pe.pFormula,'F<sub>2</sub> = F<sub>1</sub> × A<sub>2</sub>/A<sub>1</sub> = '+fN(P.Fh)+' N × '+nf(P.A2)+'/'+nf(P.A1)+' = <b>'+fN(c.F2max)+' N</b><br>Berat mobil '+fN(c.W)+' N: '+(c.F2max>=c.W?'tanganmu cukup kuat.':'tanganmu belum cukup kuat.'));
+}
+
+function pStatusUpdate(){
+  var c=pCalc(), txt, warn=false;
+  if(c.need>P.Fh){
+    txt='Gaya tangan kurang: dibutuhkan '+fN(c.need)+' N, tersedia '+fN(P.Fh)+' N. Perbesar A₂, perkecil A₁, atau kurangi massa mobil.';
+    warn=true;
+  } else if(P.h>=HMAX-1e-6){
+    txt='Tinggi maksimum '+HMAX+' cm tercapai. Tekan "Turunkan beban" untuk mulai lagi.';
+  } else if(P.drag||P.pumping){
+    txt='Memompa: tangan turun '+nf(P.s,1)+' cm, mobil sudah naik '+nf(P.h,2)+' cm.';
+  } else if(P.h>0){
+    txt='Mobil sudah naik '+nf(P.h,2)+' cm. Pompa lagi atau turunkan beban.';
+  } else {
+    txt='Tarik pegangan ke bawah (seret dengan jari atau mouse), lepaskan, lalu ulangi. Tiap langkah penuh mengangkat mobil '+nf(SMAX*P.A1/P.A2,2)+' cm.';
+  }
+  setT(pe.pStatus,txt);
+  pe.pStatus.classList.toggle('warn',warn);
+}
+
+function shake(){
+  if(P.shaking) return;
+  P.shaking=true;
+  pe.pShake.classList.remove('shake');
+  requestAnimationFrame(function(){pe.pShake.classList.add('shake');});
+  setTimeout(function(){pe.pShake.classList.remove('shake');P.shaking=false;},350);
+}
+
+function pushTo(sNew){
+  var c=pCalc(), ds=sNew-P.s;
+  if(ds>0){
+    if(c.need>P.Fh){ shake(); ds=0; }
+    else{
+      var room=HMAX-P.h, dh=ds*P.A1/P.A2;
+      if(dh>room) ds=Math.max(0,room)*P.A2/P.A1;
+      var dhh=ds*P.A1/P.A2;
+      P.s+=ds; P.h+=dhh;
+      P.Win+=c.need*ds/100; P.Wout+=c.W*dhh/100;
+    }
+  } else if(ds<0){
+    P.s=sNew;
+  }
+  pRender(); pStatusUpdate();
+}
+
+function springBack(){
+  P.busy=true;
+  var s0=P.s,t0=performance.now(),dur=reduce?1:280*(s0/SMAX+0.4);
+  function step(t){
+    var u=clamp((t-t0)/dur,0,1);
+    P.s=s0*(1-ease(u)); pRender();
+    if(u<1) requestAnimationFrame(step); else{P.busy=false;pStatusUpdate();}
+  }
+  requestAnimationFrame(step);
+}
+
+pe.pHandle.addEventListener('pointerdown',function(e){
+  if(P.busy||P.seq) return;
+  e.preventDefault();
+  try{pe.pHandle.setPointerCapture(e.pointerId);}catch(err){}
+  P.drag={y0:svgPt(pe.pSvg,e).y,s0:P.s};
+  pe.pHint.classList.add('off');
+  pStatusUpdate();
+});
+pe.pHandle.addEventListener('pointermove',function(e){
+  if(!P.drag) return;
+  var y=svgPt(pe.pSvg,e).y;
+  pushTo(clamp(P.drag.s0+(y-P.drag.y0)/K,0,SMAX));
+});
+function endDrag(){
+  if(!P.drag) return;
+  P.drag=null; springBack();
+}
+pe.pHandle.addEventListener('pointerup',endDrag);
+pe.pHandle.addEventListener('pointercancel',endDrag);
+pe.pHandle.addEventListener('lostpointercapture',endDrag);
+
+function autoStroke(){
+  return new Promise(function(res){
+    var c=pCalc();
+    pe.pHint.classList.add('off');
+    if(c.need>P.Fh){ shake(); pStatusUpdate(); res(false); return; }
+    if(P.h>=HMAX-1e-6){ pStatusUpdate(); res(false); return; }
+    P.busy=true; P.pumping=true;
+    var t0=performance.now(), dur=reduce?1:650, start=P.s;
+    function down(t){
+      var u=clamp((t-t0)/dur,0,1);
+      pushTo(start+(SMAX-start)*ease(u));
+      if(u<1) requestAnimationFrame(down); else up0();
+    }
+    function up0(){
+      var s0=P.s,t1=performance.now(),d2=reduce?1:300;
+      P.pumping=false;
+      function up(t){
+        var u=clamp((t-t1)/d2,0,1);
+        P.s=s0*(1-ease(u)); pRender();
+        if(u<1) requestAnimationFrame(up); else{P.busy=false;pStatusUpdate();res(P.h<HMAX-1e-6);}
+      }
+      requestAnimationFrame(up);
+    }
+    requestAnimationFrame(down);
+  });
+}
+pe.pHandle.addEventListener('keydown',function(e){
+  if(e.key==='Enter'||e.key===' '){e.preventDefault(); if(!P.busy&&!P.seq) autoStroke();}
+});
+pe.pump1.addEventListener('click',function(){if(!P.busy&&!P.seq) autoStroke();});
+pe.pump5.addEventListener('click',function(){
+  if(P.busy||P.seq) return;
+  P.seq=true;
+  (function loop(i){
+    if(i>=5){P.seq=false;return;}
+    autoStroke().then(function(ok){ if(ok) loop(i+1); else P.seq=false; });
+  })(0);
+});
+pe.lower.addEventListener('click',function(){
+  if(P.busy||P.seq) return;
+  P.busy=true;
+  var h0=P.h,t0=performance.now(),dur=reduce?1:300+h0*70;
+  function step(t){
+    var u=clamp((t-t0)/dur,0,1);
+    P.h=h0*(1-ease(u)); pRender();
+    if(u<1) requestAnimationFrame(step);
+    else{P.h=0;P.Win=0;P.Wout=0;P.busy=false;pRender();pStatusUpdate();}
+  }
+  requestAnimationFrame(step);
+});
+
+function bindP(id,outId,fmt,key){
+  var el=$(id),out=$(outId);
+  function upd(){P[key]=+el.value; out.textContent=fmt(+el.value); pRender(); pStatusUpdate();}
+  el.addEventListener('input',upd);
+  P[key]=+el.value; out.textContent=fmt(+el.value);
+}
+bindP('pA1','pA1o',function(v){return nf(v)+' cm²';},'A1');
+bindP('pA2','pA2o',function(v){return nf(v)+' cm²';},'A2');
+bindP('pM','pMo',function(v){return nf(v)+' kg';},'m');
+bindP('pFh','pFho',function(v){return nf(v)+' N';},'Fh');
+pRender(); pStatusUpdate();
+
+/* =========================== ARCHIMEDES =========================== */
+var FLUIDS=[
+  {n:'Alkohol',rho:790,fill:'rgba(200,225,240,0.55)'},
+  {n:'Minyak goreng',rho:920,fill:'rgba(235,190,60,0.6)'},
+  {n:'Air tawar',rho:1000,fill:'rgba(42,134,191,0.55)'},
+  {n:'Air laut',rho:1025,fill:'rgba(30,150,170,0.6)'},
+  {n:'Gliserin',rho:1260,fill:'rgba(185,215,200,0.6)'},
+  {n:'Raksa',rho:13600,fill:'rgba(165,175,185,0.92)'}
+];
+var AS=14,FY=410,TL=40,TR=440,CXA=240,H0=0.12,AT=(400/AS/100)*0.12,TS=0.2,CM=100*AS;
+var A={rho:600,V:500,fi:2,y:0,v:0,held:false,ripple:0,t:0,drag:null};
+var ae={};
+['aSvg','aCube','aWater','aSurf','aRope','aRopeLine','aReading','aArrows','aRuler','aStatus','aFluid','aRho','aRhoo','aVol','aVolo','aoRf','aoSub','aoW','aoFb','aoScale','aoRise','aFormula','aPredict','aDrop','aChips'].forEach(function(k){ae[k]=$(k);});
+
+FLUIDS.forEach(function(f,i){
+  var o=document.createElement('option');
+  o.value=i; o.textContent=f.n+' ('+nf(f.rho)+' kg/m³)';
+  if(i===A.fi) o.selected=true;
+  ae.aFluid.appendChild(o);
+});
+
+(function buildRuler(){
+  var d='M450 '+FY+'V'+(FY-20*CM/100), l='', i, y, len;
+  for(i=0;i<=20;i++){
+    y=FY-i*AS; len=i%5===0?9:5; d+='M450 '+y+'h'+(-len);
+    if(i%5===0) l+='<text class="lbl" x="458" y="'+(y+4)+'">'+i+'</text>';
+  }
+  l+='<text class="lbl" x="458" y="'+(FY-20*AS-10)+'">cm</text>';
+  ae.aRuler.innerHTML='<path class="tick" d="'+d+'"/>'+l;
+})();
+
+function Lm(){return Math.cbrt(A.V*1e-6);}
+function rhoF(){return FLUIDS[A.fi].rho;}
+function sub(y){var l=Lm(),a=l*l,sd=(H0-y)/(1-a/AT);return Math.max(0,Math.min(l,sd));}
+function yMax(){return (FY-48)/CM-Lm();}
+function equilibriumY(){
+  var l=Lm(),a=l*l,frac=A.rho/rhoF();
+  if(frac>1.0005) return 0;
+  return clamp(H0-frac*l*(1-a/AT),0,yMax());
+}
+function mix(a,b,u){return a.map(function(v,i){return v+(b[i]-v)*u;});}
+function cubeColor(rho){
+  var t=clamp(Math.log(rho/100)/Math.log(200),0,1);
+  var s0=[216,178,122],s1=[169,180,191],s2=[61,74,87];
+  var c=t<0.45?mix(s0,s1,t/0.45):mix(s1,s2,(t-0.45)/0.55);
+  return 'rgb('+c.map(Math.round).join(',')+')';
+}
+
+function physics(dt){
+  if(A.held){A.v=0;return;}
+  var l=Lm(),a=l*l,m=A.rho*l*a,W=m*G,rf=rhoF();
+  var dtS=dt*TS,n=Math.max(1,Math.ceil(dtS/0.002)),h=dtS/n,ym=yMax();
+  var omega=Math.sqrt(rf*G/(A.rho*l));
+  for(var i=0;i<n;i++){
+    var sd=sub(A.y),Fb=rf*a*sd*G,frac=sd/l;
+    var c=0.2+frac*0.7*omega;
+    var acc=(Fb-W)/m-c*A.v;
+    A.v+=acc*h; A.y+=A.v*h;
+    if(A.y<0){A.y=0;if(A.v<0)A.v=0;}
+    if(A.y>ym){A.y=ym;if(A.v>0)A.v=0;}
+  }
+}
+
+function arrow(x,y0,y1,cls){
+  var up=y1<y0, tip=up?10:-10;
+  var d='M'+x.toFixed(1)+' '+y0.toFixed(1)+'V'+y1.toFixed(1)+'M'+(x-7).toFixed(1)+' '+(y1+tip).toFixed(1)+'L'+x.toFixed(1)+' '+y1.toFixed(1)+'L'+(x+7).toFixed(1)+' '+(y1+tip).toFixed(1);
+  return '<path class="halo" d="'+d+'"/><path class="'+cls+'" d="'+d+'"/>';
+}
+
+function aRender(dt){
+  var l=Lm(),a=l*l,Lpx=l*CM,rf=rhoF();
+  A.y=clamp(A.y,0,yMax());
+  var sd=sub(A.y),Hn=H0+a*sd/AT;
+  var bot=FY-A.y*CM,top=bot-Lpx,surf=FY-Hn*CM;
+  var near=sd>0&&sd<l;
+  A.ripple=Math.min(4,A.ripple+(near&&!A.held?Math.abs(A.v)*dt*8:0));
+  A.ripple*=Math.exp(-dt*1.8); A.t+=dt;
+
+  var N=32,pts='',i,x,y;
+  for(i=0;i<=N;i++){
+    x=TL+(TR-TL)*i/N; y=surf+A.ripple*Math.sin(i*0.8+A.t*6);
+    pts+=(i?'L':'M')+x.toFixed(1)+' '+y.toFixed(1);
+  }
+  ae.aSurf.setAttribute('d',pts);
+  ae.aWater.setAttribute('d',pts+'V'+FY+'H'+TL+'Z');
+  ae.aWater.setAttribute('fill',FLUIDS[A.fi].fill);
+
+  var cube=ae.aCube;
+  cube.setAttribute('x',(CXA-Lpx/2).toFixed(1)); cube.setAttribute('y',top.toFixed(1));
+  cube.setAttribute('width',Lpx.toFixed(1)); cube.setAttribute('height',Lpx.toFixed(1));
+  cube.setAttribute('fill',cubeColor(A.rho));
+
+  var Wn=A.rho*l*a*G, Fb=rf*a*sd*G, ref=Math.max(Wn,Fb,1e-9);
+  var cy=(top+bot)/2, lenW=80*Wn/ref, lenF=80*Fb/ref, s='';
+  s+=arrow(CXA-12,cy,cy+lenW,'arW');
+  s+='<text class="alab" x="'+(CXA-12)+'" y="'+(cy+lenW+18)+'" text-anchor="middle" fill="var(--warn)">W</text>';
+  if(lenF>3){
+    s+=arrow(CXA+12,cy,cy-lenF,'arF');
+    s+='<text class="alab" x="'+(CXA+12)+'" y="'+(cy-lenF-8)+'" text-anchor="middle" fill="var(--water-btn)">F<tspan dy="3" font-size="11">A</tspan></text>';
+  }
+  setH(ae.aArrows,s);
+
+  if(A.held){
+    ae.aRope.style.display='';
+    ae.aRopeLine.setAttribute('y2',top.toFixed(1));
+    setT(ae.aReading,nf(Math.max(0,Wn-Fb),2)+' N');
+  } else ae.aRope.style.display='none';
+
+  var subCm3=sd*a*1e6, pct=sd/l*100;
+  setT(ae.aoRf,nf(rf)+' kg/m³');
+  setT(ae.aoSub,nf(subCm3)+' cm³ ('+nf(pct)+'%)');
+  setT(ae.aoW,nf(Wn,2)+' N');
+  setT(ae.aoFb,nf(Fb,2)+' N');
+  setT(ae.aoScale,nf(Math.max(0,Wn-Fb),2)+' N');
+  setT(ae.aoRise,nf((Hn-H0)*1000,1)+' mm');
+  setH(ae.aFormula,'F<sub>A</sub> = ρ<sub>f</sub> × g × V<sub>tercelup</sub><br>= '+nf(rf)+' × 9,8 × '+nf(sd*a,6)+' = <b>'+nf(Fb,2)+' N</b>');
+
+  var frac=A.rho/rf, pred;
+  if(Math.abs(frac-1)<=0.005) pred='Prediksi: melayang, ρ<sub>b</sub> sama dengan ρ<sub>f</sub>.';
+  else if(frac<1) pred='Prediksi: mengapung. Saat setimbang '+nf(frac*100)+'% volume tercelup (ρ<sub>b</sub>/ρ<sub>f</sub>).';
+  else pred='Prediksi: tenggelam. ρ<sub>b</sub> lebih besar '+nf(frac,2)+'× dari ρ<sub>f</sub>.';
+  setH(ae.aPredict,pred);
+
+  var st;
+  if(A.held) st='Ditahan: lepaskan untuk melihat apa yang terjadi. Neraca membaca W − Fₐ = '+nf(Math.max(0,Wn-Fb),2)+' N.';
+  else if(sd<=1e-9&&A.y>H0+1e-4) st='Jatuh bebas di udara. Gaya apung masih nol karena belum ada bagian yang tercelup.';
+  else if(Math.abs(A.v)>0.03) st=A.v>0?'Naik: gaya apung lebih besar dari berat.':'Bergerak turun: berat lebih besar dari gaya apung.';
+  else if(A.y<=1e-6&&Wn>Fb+1e-6) st='Diam di dasar: berat '+nf(Wn,2)+' N lebih besar dari gaya apung '+nf(Fb,2)+' N.';
+  else if(sd<l-1e-9) st='Mengapung setimbang: gaya apung sama dengan berat ('+nf(Wn,2)+' N).';
+  else st='Melayang: gaya apung sama dengan berat ('+nf(Wn,2)+' N).';
+  setT(ae.aStatus,st);
+}
+
+ae.aCube.addEventListener('pointerdown',function(e){
+  e.preventDefault();
+  try{ae.aCube.setPointerCapture(e.pointerId);}catch(err){}
+  var pt=svgPt(ae.aSvg,e);
+  A.drag={off:pt.y-(FY-A.y*CM),last:pt.y};
+  A.held=true; A.v=0;
+});
+ae.aCube.addEventListener('pointermove',function(e){
+  if(!A.drag) return;
+  var pt=svgPt(ae.aSvg,e), l=Lm(), sd=sub(A.y);
+  A.y=clamp((FY-(pt.y-A.drag.off))/CM,0,yMax());
+  A.v=0;
+  if(sd>0&&sd<l) A.ripple=Math.min(3,A.ripple+Math.abs(pt.y-A.drag.last)*0.04);
+  A.drag.last=pt.y;
+});
+function aRelease(){ if(!A.drag) return; A.drag=null; A.held=false; A.v=0; }
+ae.aCube.addEventListener('pointerup',aRelease);
+ae.aCube.addEventListener('pointercancel',aRelease);
+ae.aCube.addEventListener('lostpointercapture',aRelease);
+
+ae.aDrop.addEventListener('click',function(){
+  A.held=false; A.drag=null; A.v=0; A.y=Math.min(0.18,yMax());
+});
+ae.aFluid.addEventListener('change',function(){A.fi=+ae.aFluid.value;});
+
+function rhoFromSlider(p){
+  var raw=100*Math.pow(200,p/1000);
+  var step=raw<1000?5:raw<5000?10:50;
+  return Math.max(100,Math.round(raw/step)*step);
+}
+function sliderFromRho(r){return Math.round(1000*Math.log(r/100)/Math.log(200));}
+function syncChips(){
+  Array.prototype.forEach.call(ae.aChips.querySelectorAll('.chip'),function(b){
+    var r=+b.getAttribute('data-rho');
+    b.setAttribute('aria-pressed',Math.abs(A.rho-r)/r<0.01?'true':'false');
+  });
+}
+function syncRho(){ae.aRhoo.textContent=nf(A.rho)+' kg/m³'; syncChips();}
+ae.aRho.addEventListener('input',function(){A.rho=rhoFromSlider(+ae.aRho.value);syncRho();});
+Array.prototype.forEach.call(ae.aChips.querySelectorAll('.chip'),function(b){
+  b.addEventListener('click',function(){
+    A.rho=+b.getAttribute('data-rho');
+    ae.aRho.value=sliderFromRho(A.rho);
+    syncRho();
+  });
+});
+ae.aVol.addEventListener('input',function(){
+  A.V=+ae.aVol.value; ae.aVolo.textContent=nf(A.V)+' cm³';
+  A.y=clamp(A.y,0,yMax());
+});
+ae.aRho.value=sliderFromRho(A.rho);
+ae.aVol.value=A.V; ae.aVolo.textContent=nf(A.V)+' cm³';
+syncRho();
+A.y=equilibriumY();
+
+var last=performance.now();
+function loop(now){
+  var dt=Math.min(0.05,Math.max(0,(now-last)/1000)); last=now;
+  physics(dt); aRender(dt);
+  requestAnimationFrame(loop);
+}
+aRender(0.016);
+requestAnimationFrame(loop);
+})();
+</script>
+
+</body></html>
